@@ -28,6 +28,7 @@ app.post('/voters', async (req, res) => {
         res.status(201).json(result.rows[0])
 
     } catch (err) {
+        //console.log(err.message)
         res.status(500).json({eror: err.message})
 
     }
