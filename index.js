@@ -33,3 +33,13 @@ app.post('/voters', async (req, res) => {
 
     }
 })
+
+//get/voters - lista de votantes
+app.get('/voters', async (req, res) => {
+    try {
+        const result = await pool.query('SELECT * FROM voters')
+        res.json(result.rows)
+    } catch(err) {
+        res.status(500).json({error: err.message})
+    }
+})
