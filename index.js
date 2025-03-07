@@ -133,6 +133,50 @@ app.delete('/candidates/:id', async (req, res) => {
 })
 
 
+// VOTOS  
+//POST /votes votar
+app.post('/votes', async (req, res) => {
+    const { voter_id, candidate_id } = req.body
+
+    try {
+        //validar  que el votante exista y no haya votado
+        const voterCheck = await pool.query('SELECT * FROM voters WHERE id = $1', [voter_id])
+        if (voterCheck.rows.length === 0) {
+            return res.status(404).json({ error: 'Votante no encontrado'})
+        }
+
+        if (voterCheck.rows[0].has_voted) {
+            return res.status(404).json({ error: 'El votante ya ha emitido un voto'})
+        }
+
+
+        //validacr q el candidato si existe
+        const candidateCheck = await pool.query('SELECT * FROM candidates WHERE id = $1', [candidate_id])
+        if (candidateCheck.rows.length === 0) {
+            return res.status(404).json({ error: 'Candidato no encontrado'})
+        }
+
+        //crear voto
+        const vote = await pool.query(
+            'INSERT INTO votes (voter_id, candidate_id) VALUES ($1, $2) RETURNING *',
+            [voter_id, candidate_id]
+        )
+
+        //actualizar la variable has_voted del votante
+        await pool.query('UPDATE voters SET has_voted = TRUE WHERE id = $1', [voter_id])
+
+        //incrementar el conteo de votos en candidato
+        await pool.query('UPDATE candidates SET votes = votes + 1 WHERE id = $1', [candidate_id])
+
+        res.status(201).json(vote.rows[0])
+
+
+    } catch (err) {
+        res.status(500).json({error: err.message})
+    }
+})
+
+
 
 //iniciar el servidor
 app.listen(port, () => {
