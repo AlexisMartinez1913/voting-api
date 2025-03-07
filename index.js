@@ -91,6 +91,16 @@ app.post('/candidates', async (req, res) => {
     }
 })
 
+// GET /candidates - Lista de candidatos
+app.get('/candidates', async (req, res) => {
+    try {
+        const result = await pool.query('SELECT * FROM candidates')
+        res.json(result.rows)
+    } catch (err) {
+        res.status(500).json( {error: err.message})
+
+    }
+})
 
 
 
