@@ -188,7 +188,41 @@ app.get('/votes', async (req, res) => {
 })
 
 
+// GET /votes/statistics: Estadísticas de votación
+app.get('/votes/statistics', async (req, res) => {
+    try {
+        //mostrar total de votantes
+        const votersVoted = await pool.query('SELECT COUNT(*) FROM votes WHERE has_voted = TRUE')
+        const totalVoters = parseInt(votersVoted.rows[0].count)
 
+        //total de votos por candidato
+        const votesPerCandidate = await pool.query(
+            'SELECT c.id, c.name, c.party, c.votes FROM candidates c ORDER BY c.votes DESC'
+        )
+
+        //vtotal de votos emitidos
+        const totalVotes = votesPerCandidate.rows.reduce((sum, candidate) => sum + candidate.votes, 0)
+
+        //porcentaje de candidato
+
+        const stats = votesPerCandidate.rows.map(candidate => ({
+            id: candidate.id,
+            name: candidate.name,
+            party: candidate.party,
+            votes: candidate.votes,
+            percentage: totalVotes > 0 ? ((candidate.votes / totalVotes) * 100).toFixed(2) : 0,
+        }))
+
+        res.json({
+            totalVoters,
+            totalVotes,
+            candidates: stats
+        })
+
+    } catch (err) {
+        res.status(500).json({error: err.message})
+    }
+})
 
 //iniciar el servidor
 app.listen(port, () => {
