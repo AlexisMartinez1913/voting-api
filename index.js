@@ -29,7 +29,7 @@ app.post('/voters', async (req, res) => {
 
     } catch (err) {
         //console.log(err.message)
-        res.status(500).json({eror: err.message})
+        res.status(500).json({error: err.message})
 
     }
 })
@@ -66,4 +66,36 @@ app.delete('/voters/:id', async (req, res) => {
     } catch (err) {
         res.status(500).json({ error: err.message })
     }
+})
+
+// Candidatos
+app.post('/candidates', async (req, res) => {
+    const { name, party} = req.body
+
+    try {
+        //validacion que no sea votante
+        const isVoter = await pool.query('SELECT * FROM voters WHERE name = $1', [name])
+        if (isVoter.rows.length > 0) {
+            return res.status(400).json({ error: 'ESTE NOMBRE ya está REGISTRADO'})
+        }
+
+        const result = await pool.query(
+            'INSERT INTO candidates (name, party) VALUES ($1, $2) RETURNING *',
+            [name, party]
+        )
+
+        res.status(201).json(result.rows[0])
+    } catch (err) {
+        res.status(500).json( {error: err.message})
+
+    }
+})
+
+
+
+
+
+//iniciar el servidor
+app.listen(port, () => {
+    console.log(`Servidor corriendo en http://localhost:${port}`)
 })
