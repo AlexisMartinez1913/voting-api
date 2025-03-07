@@ -1,0 +1,307 @@
+openapi: 3.0.0
+info:
+  title: Voting API
+  description: API RESTful para gestionar un sistema de votaciones con votantes, candidatos y votos.
+  version: 1.0.0
+servers:
+  - url: http://localhost:3000
+    description: Servidor local
+paths:
+  /voters:
+    post:
+      summary: Registrar un nuevo votante
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  example: Yamile Garcia
+                email:
+                  type: string
+                  example: yagarcia@example.com
+              required:
+                - name
+                - email
+      responses:
+        '201':
+          description: Votante creado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Voter'
+        '400':
+          description: Nombre ya registrado como candidato
+        '500':
+          description: Error interno del servidor
+    get:
+      summary: Obtener lista de votantes
+      responses:
+        '200':
+          description: Lista de votantes
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Voter'
+        '500':
+          description: Error interno del servidor
+  /voters/{id}:
+    get:
+      summary: Obtener detalles de un votante por ID
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+          description: ID del votante
+      responses:
+        '200':
+          description: Detalles del votante
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Voter'
+        '404':
+          description: Votante no encontrado
+        '500':
+          description: Error interno del servidor
+    delete:
+      summary: Eliminar un votante por ID
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+          description: ID del votante
+      responses:
+        '200':
+          description: Votante eliminado
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  voter:
+                    $ref: '#/components/schemas/Voter'
+        '404':
+          description: Votante no encontrado
+        '500':
+          description: Error interno del servidor
+  /candidates:
+    post:
+      summary: Registrar un nuevo candidato
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  example: Angelica Alvarado
+                party:
+                  type: string
+                  example: Partido Rojo
+              required:
+                - name
+      responses:
+        '201':
+          description: Candidato creado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Candidate'
+        '400':
+          description: Nombre ya registrado como votante
+        '500':
+          description: Error interno del servidor
+    get:
+      summary: Obtener lista de candidatos
+      responses:
+        '200':
+          description: Lista de candidatos
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Candidate'
+        '500':
+          description: Error interno del servidor
+  /candidates/{id}:
+    get:
+      summary: Obtener detalles de un candidato por ID
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+          description: ID del candidato
+      responses:
+        '200':
+          description: Detalles del candidato
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Candidate'
+        '404':
+          description: Candidato no encontrado
+        '500':
+          description: Error interno del servidor
+    delete:
+      summary: Eliminar un candidato por ID
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+          description: ID del candidato
+      responses:
+        '200':
+          description: Candidato eliminado
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  candidate:
+                    $ref: '#/components/schemas/Candidate'
+        '404':
+          description: Candidato no encontrado
+        '500':
+          description: Error interno del servidor
+  /votes:
+    post:
+      summary: Emitir un voto
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                voter_id:
+                  type: integer
+                  example: 1
+                candidate_id:
+                  type: integer
+                  example: 1
+              required:
+                - voter_id
+                - candidate_id
+      responses:
+        '201':
+          description: Voto registrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Vote'
+        '400':
+          description: El votante ya ha votado
+        '404':
+          description: Votante o candidato no encontrado
+        '500':
+          description: Error interno del servidor
+    get:
+      summary: Obtener lista de votos
+      responses:
+        '200':
+          description: Lista de votos
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Vote'
+        '500':
+          description: Error interno del servidor
+  /votes/statistics:
+    get:
+      summary: Obtener estadísticas de votación
+      responses:
+        '200':
+          description: Estadísticas de la votación
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  totalVotersVoted:
+                    type: integer
+                  totalVotes:
+                    type: integer
+                  candidates:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: integer
+                        name:
+                          type: string
+                        party:
+                          type: string
+                        votes:
+                          type: integer
+                        percentage:
+                          type: string
+        '500':
+          description: Error interno del servidor
+components:
+  schemas:
+    Voter:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        email:
+          type: string
+        has_voted:
+          type: boolean
+      required:
+        - id
+        - name
+        - email
+    Candidate:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        party:
+          type: string
+        votes:
+          type: integer
+      required:
+        - id
+        - name
+    Vote:
+      type: object
+      properties:
+        id:
+          type: integer
+        voter_id:
+          type: integer
+        candidate_id:
+          type: integer
+      required:
+        - id
+        - voter_id
+        - candidate_id

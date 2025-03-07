@@ -2,13 +2,20 @@
 
 const express = require('express')
 const pool = require('./db')
+const swagger = require('swagger-ui-express')  //modulo no nativo -  swagger
+const YAML = require('yamljs') //modulo de yamljs
 require('dotenv').config()
 
 const app = express()
 const port = process.env.PORT || 3000
 
+//poner la documentación de swagger desde el archivo YAML
+const swaggerDocument = YAML.load('./swagger.yaml')
+
 app.use(express.json()) 
 
+//configurar swagger en la ruta /api-docs
+app.use('/api-docs', swagger.serve, swagger.setup(swaggerDocument))
 
 // votantes
 //post /voters: registrar votante
