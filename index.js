@@ -177,6 +177,18 @@ app.post('/votes', async (req, res) => {
 })
 
 
+// GET /votes: Lista de votos
+app.get('/votes', async (req, res) => {
+    try {
+        const result = await pool.query('SELECT * FROM votes')
+        res.json(result.rows)
+    } catch (err) {
+        res.status(500).json({error: err.message})
+    }
+})
+
+
+
 
 //iniciar el servidor
 app.listen(port, () => {
