@@ -192,7 +192,7 @@ app.get('/votes', async (req, res) => {
 app.get('/votes/statistics', async (req, res) => {
     try {
         //mostrar total de votantes
-        const votersVoted = await pool.query('SELECT COUNT(*) FROM votes WHERE has_voted = TRUE')
+        const votersVoted = await pool.query('SELECT COUNT(*) FROM voters WHERE has_voted = TRUE')
         const totalVoters = parseInt(votersVoted.rows[0].count)
 
         //total de votos por candidato
