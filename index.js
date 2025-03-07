@@ -55,3 +55,15 @@ app.get('/voters/:id', async (req, res) => {
         res.status(500).json({ error: err.message})
     }
 })
+
+// DELETE /voters/:id Eliminar votante
+app.delete('/voters/:id', async (req, res) => {
+    const { id } = req.params;
+    try {
+        const result = await pool.query('DELETE FROM voters WHERE id = $1 RETURNING *', [id])
+        if (result.rows.length === 0) return res.status(404).json({ error: 'Votante no encontrado'})
+        res.json({ message: 'Votante ELIMINADO con exito', voter: result.rows[0]})
+    } catch (err) {
+        res.status(500).json({ error: err.message })
+    }
+})
